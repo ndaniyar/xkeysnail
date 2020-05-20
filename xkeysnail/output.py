@@ -43,6 +43,7 @@ def send_event(event):
 def send_key_action(key, action):
     update_modifier_key_pressed(key, action)
     update_pressed_keys(key, action)
+    print (key, action, end=' ')
     _uinput.write(ecodes.EV_KEY, key, action)
     send_sync()
 

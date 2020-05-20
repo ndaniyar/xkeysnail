@@ -17,12 +17,13 @@ _release_combo = False
 def get_active_window_wm_class(display=Xlib.display.Display()):
     """Get active window's WM_CLASS"""
     current_window = display.get_input_focus().focus
+    wid = current_window.id
     pair = get_class_name(current_window)
     if pair:
         # (process name, class name)
-        return str(pair[1])
+        return str(pair[1]), wid
     else:
-        return ""
+        return "", wid
 
 
 def get_class_name(window):
@@ -385,7 +386,8 @@ def on_event(event, device_name, quiet):
     # translate keycode (like xmodmap)
     active_mod_map = _mod_map
     if _conditional_mod_map:
-        wm_class = get_active_window_wm_class()
+        wm_class, wid = get_active_window_wm_class()
+        print (f'\n{time():20.6f} {wid:12d} {wm_class:>30} ', key, action, ' >> ', end='')
         for condition, mod_map in _conditional_mod_map:
             params = [wm_class]
             if len(signature(condition).parameters) == 2:
@@ -399,7 +401,7 @@ def on_event(event, device_name, quiet):
 
     active_multipurpose_map = _multipurpose_map
     if _conditional_multipurpose_map:
-        wm_class = get_active_window_wm_class()
+        wm_class, wid = get_active_window_wm_class()
         for condition, mod_map in _conditional_multipurpose_map:
             params = [wm_class]
             if len(signature(condition).parameters) == 2:
@@ -463,7 +465,7 @@ def transform_key(key, action, wm_class=None, quiet=False):
         is_top_level = True
         _mode_maps = []
         if wm_class is None:
-            wm_class = get_active_window_wm_class()
+            wm_class, wid = get_active_window_wm_class()
         keymap_names = []
         for condition, mappings, name in _toplevel_keymaps:
             if (callable(condition) and condition(wm_class)) \
